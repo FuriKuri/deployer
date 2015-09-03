@@ -7,7 +7,8 @@ import (
 	"os"
 )
 
-func main() {
+func main2() {
+	main2()
 	webhook.Server(func(w webhook.Webhook) webhook.Verification {
 		return webhook.Verification{
 			State:       "S",
@@ -17,7 +18,41 @@ func main() {
 	})
 }
 
-func main2() {
+func main() {
+	client, _ := docker.NewClientFromEnv()
+	client.StopContainer("hello-docker", 30)
+	client.RemoveContainer(docker.RemoveContainerOptions{
+		ID:            "hello-docker",
+		RemoveVolumes: false,
+		Force:         false,
+	})
+
+	exposedCadvPort := map[docker.Port]struct{}{
+		"8000/tcp": {}}
+
+	createContConf := docker.Config{
+		ExposedPorts: exposedCadvPort,
+		Image:        "furikuri/hello-docker"}
+
+	portBindings := map[docker.Port][]docker.PortBinding{
+		"8000/tcp": []docker.PortBinding{docker.PortBinding{HostPort: "8000"}}}
+
+	createContHostConfig := docker.HostConfig{
+		PortBindings:    portBindings,
+		PublishAllPorts: true,
+		Privileged:      false}
+
+	createContOps := docker.CreateContainerOptions{
+		Name:       "hello-docker",
+		Config:     &createContConf,
+		HostConfig: &createContHostConfig}
+
+	client.CreateContainer(createContOps)
+	client.StartContainer("hello-docker", nil)
+
+}
+
+func main3() {
 	endpoint := os.Getenv("DOCKER_HOST")
 	path := os.Getenv("DOCKER_CERT_PATH")
 	ca := fmt.Sprintf("%s/ca.pem", path)
