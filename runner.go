@@ -20,19 +20,19 @@ func main2() {
 
 func main() {
 	client, _ := docker.NewClientFromEnv()
-	client.StopContainer("hello-docker", 30)
+	client.StopContainer("hello", 30)
 	client.RemoveContainer(docker.RemoveContainerOptions{
-		ID:            "hello-docker",
+		ID:            "hello",
 		RemoveVolumes: false,
 		Force:         false,
 	})
 
-	exposedCadvPort := map[docker.Port]struct{}{
-		"8000/tcp": {}}
+	//exposedCadvPort := map[docker.Port]struct{}{
+	//	"8000/tcp": {}}
 
 	createContConf := docker.Config{
-		ExposedPorts: exposedCadvPort,
-		Image:        "furikuri/hello-docker"}
+		// ExposedPorts: exposedCadvPort,
+		Image:        "furikuri/hello-docker-hapi"}
 
 	portBindings := map[docker.Port][]docker.PortBinding{
 		"8000/tcp": []docker.PortBinding{docker.PortBinding{HostPort: "8000"}}}
@@ -43,12 +43,12 @@ func main() {
 		Privileged:      false}
 
 	createContOps := docker.CreateContainerOptions{
-		Name:       "hello-docker",
+		Name:       "hello",
 		Config:     &createContConf,
 		HostConfig: &createContHostConfig}
 
 	client.CreateContainer(createContOps)
-	client.StartContainer("hello-docker", nil)
+	client.StartContainer("hello", nil)
 
 }
 
